@@ -1,0 +1,63 @@
+using UnityEngine;
+using System.Collections;
+
+public class AI : MonoBehaviour
+{
+	public CharacterController characterControler;
+	private Transform gracz;
+	private Transform mojObiekt;
+
+	
+	public float predkoscObrotu = 4.0f;
+	public float predkoscRuchu = 5.0f;
+	public float zasieg = 30.0f;
+
+
+	public float aktualnaWysokoscSkoku = 0f;
+	
+	public float odstepOdGracza = 2f;
+
+	
+	public bool czyDuch;
+	
+	
+	void Start () {
+		characterControler = GetComponent<CharacterController> ();
+		mojObiekt = transform;
+		GameObject go = GameObject.FindWithTag ("Player");
+		gracz = go.transform;
+	}
+	
+	
+	void Update (){
+
+		
+		float dystans = Vector3.Distance (mojObiekt.position, gracz.position);
+
+		if (dystans < zasieg && dystans > odstepOdGracza) {
+
+			//Vector3 graczPoz = new Vector3(gracz.position.x, mojObiekt.position.y, gracz.position.z);
+			Vector3 graczPoz = new Vector3(gracz.position.x, gracz.position.y, gracz.position.z);
+
+	
+			mojObiekt.rotation = Quaternion.Slerp (mojObiekt.rotation, Quaternion.LookRotation (graczPoz - mojObiekt.position), predkoscRuchu * Time.deltaTime);
+
+
+
+
+			if (!characterControler.isGrounded ){//Jezeli jestesmy w powietrzu(skok)
+				aktualnaWysokoscSkoku += Physics.gravity.y * Time.deltaTime;
+			}
+			Debug.Log(characterControler.isGrounded);
+
+			if(!czyDuch) {
+
+				Vector3 ruch = new Vector3(mojObiekt.forward.x, aktualnaWysokoscSkoku, mojObiekt.forward.z);
+	
+				characterControler.Move(ruch * predkoscRuchu * Time.deltaTime);
+			} else {
+
+				mojObiekt.position += mojObiekt.forward * predkoscRuchu * Time.deltaTime;
+			}
+		}
+
